@@ -19,7 +19,7 @@ bootcmd:
 runcmd:
  - "/usr/local/bin/bootstrap.sh  >> /tmp/bootstrap.log"
 
-
+puppet:
 write_files:
  - path: "/usr/local/bin/bootstrap.sh"
    permissions: "0777"
@@ -43,6 +43,7 @@ write_files:
      echo
      ) > /etc/motd
 
+
      # Configure resolv.conf.
      sed -i -e 's/search.*/search ${resolvers}/' /etc/resolv.conf
 
@@ -50,14 +51,15 @@ write_files:
      ( echo ; echo 'supersede domain-search "${resolvers}";' ) \
      >> /etc/dhcp/dhclient-eth0.conf
 
-     # configure storage for /usr/local/pmc.
+
+     # configure storage for /usr/local/srini.
      if [ -e /dev/xvdb ] ; then
         /sbin/pvcreate /dev/xvdb
-        /sbin/vgcreate vg-pmc /dev/xvdb
+        /sbin/vgcreate vg-srini /dev/xvdb
         /sbin/vgchange -a y vg-srini
-        /sbin/lvcreate -l 85%FREE -n lv-usr-local-srini vg-srini
-        /sbin/mke2fs -t ext4 /dev/vg-srini/lv-usr-local-srini
+        /sbin/lvcreate -l 85%FREE -n lv-usr-local-pmc vg-srini
+        /sbin/mke2fs -t ext4 /dev/vg-srini/lv-usr-local-pmc
         mkdir -p /usr/local/srini
-        echo -e "/dev/vg-pmc/lv-usr-local-srini\t/usr/local/srini\text4\tdefaults\t1 2" >> /etc/fstab
+        echo -e "/dev/vg-srini/lv-usr-local-pmc\t/usr/local/srini\text4\tdefaults\t1 2" >> /etc/fstab
         mount /usr/local/srini
      fi
